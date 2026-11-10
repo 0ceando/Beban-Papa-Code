@@ -5,28 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Peeking Phone AU</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Font untuk tampilan iOS -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <!-- Bingkai HP -->
     <div class="phone-frame">
         
-        <!-- Dynamic Island (Lubang atas) -->
+        <!-- Dynamic Island -->
         <div class="dynamic-island"></div>
 
-        <!-- Status Bar -->
+        <!-- Status Bar Gaya iPhone -->
         <div class="status-bar">
             <div class="time" id="status-time">13:20</div>
             <div class="icons">
-                <span>📶</span>
-                <span>📶</span>
-                <span>🔋</span>
+                <!-- Ikon Sinyal SVG -->
+                <svg width="18" height="12" viewBox="0 0 18 12" fill="white"><path d="M1 12h2V8H1v4zm4 0h2V6H5v6zm4 0h2V4H9v8zm4 0h2V2h-2v10zm4-10v10h2V2h-2z"/></svg>
+                <!-- Ikon Wifi SVG -->
+                <svg width="18" height="12" viewBox="0 0 18 12" fill="white"><path d="M9 12l2.5-2.5C10.3 8.5 8.6 8.5 7.5 9.5L9 12zM4.5 6.5l1.5 1.5c1.5-1.5 4-1.5 5.5 0l1.5-1.5c-2.5-2.5-6.5-2.5-8.5 0zM1 3l1.5 1.5c3.5-3.5 9-3.5 12.5 0L16.5 3C12 -1 5 1 1 3z"/></svg>
+                <!-- Ikon Baterai SVG -->
+                <svg width="24" height="12" viewBox="0 0 24 12" fill="white"><rect x="1" y="1" width="20" height="10" rx="3" stroke="white" stroke-width="1" fill="none"/><rect x="3" y="3" width="16" height="6" rx="1.5" fill="white"/><path d="M22 4v4a2 2 0 0 0 0-4z" fill="white"/></svg>
             </div>
         </div>
 
-        <!-- LAYAR KUNCI (Gambar 1) -->
+        <!-- LAYAR KUNCI -->
         <div class="screen lock-screen" id="lock-screen">
             <div class="lock-content">
                 <p class="date">Saturday, October 31</p>
@@ -34,9 +35,11 @@
                 <div class="language-pill">🌐 English</div>
             </div>
 
-            <!-- Notifikasi WhatsApp -->
+            <!-- Notifikasi WhatsApp Asli -->
             <div class="notification">
-                <div class="notif-icon">💬</div>
+                <div class="notif-icon">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
+                </div>
                 <div class="notif-text">
                     <div class="notif-header">
                         <span class="notif-name">Apin 😍</span>
@@ -46,15 +49,56 @@
                 </div>
             </div>
 
-            <!-- Tombol Bawah -->
-            <div class="lock-bottom">
+            <!-- Tombol Bawah & Swipe -->
+            <div class="lock-bottom" id="swipe-area">
                 <div class="bottom-buttons">
-                    <button class="circle-btn">🔦</button>
-                    <button class="circle-btn">📷</button>
+                    <!-- Ikon Senter SVG -->
+                    <button class="circle-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M11 1v2h2V1h-2zm6.7 2.9l-1.4 1.4 1.4 1.4 1.4-1.4-1.4-1.4zM5 2.9L3.6 4.3l1.4 1.4L6.4 4.3 5 2.9zM12 6c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 10c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm-8-4H2v2h2v-2zm16 0h-2v2h2v-2zM12 22v2h2v-2h-2z"/></svg>
+                    </button>
+                    <!-- Ikon Kamera SVG -->
+                    <button class="circle-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                    </button>
                 </div>
-                <p class="swipe-text">Swipe up to open</p>
+                <!-- Teks ini yang akan kita buat interaktif -->
+                <p class="swipe-text" onclick="bukaLayarPassword()">Swipe up to open</p>
                 <div class="home-indicator"></div>
             </div>
+        </div>
+
+        <!-- LAYAR PASSWORD (Gambar 2) - Tersembunyi di awal -->
+        <div class="screen passcode-screen hidden" id="passcode-screen">
+            <div class="lock-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
+            </div>
+            <h2>Enter Passcode</h2>
+            <p class="hint">alif's birthday</p>
+            
+            <!-- Titik-titik Password -->
+            <div class="passcode-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+
+            <!-- Keypad Angka -->
+            <div class="keypad">
+                <button class="key" onclick="tekanAngka('1')">1<span>ABC</span></button>
+                <button class="key" onclick="tekanAngka('2')">2<span>DEF</span></button>
+                <button class="key" onclick="tekanAngka('3')">3<span>GHI</span></button>
+                <button class="key" onclick="tekanAngka('4')">4<span>JKL</span></button>
+                <button class="key" onclick="tekanAngka('5')">5<span>MNO</span></button>
+                <button class="key" onclick="tekanAngka('6')">6<span>PQR</span></button>
+                <button class="key" onclick="tekanAngka('7')">7<span>STU</span></button>
+                <button class="key" onclick="tekanAngka('8')">8<span>VWX</span></button>
+                <button class="key" onclick="tekanAngka('9')">9<span>YZ</span></button>
+                <div class="empty"></div>
+                <button class="key" onclick="tekanAngka('0')">0</button>
+                <button class="key text-key" onclick="hapusAngka()">Cancel</button>
+            </div>
+            <p class="emergency">Emergency</p>
         </div>
 
     </div>
