@@ -4,105 +4,755 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Peeking Phone AU</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- RESET & FONT --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- BINGKAI IPHONE --- */
+        .iphone-frame {
+            width: 390px;
+            height: 844px;
+            background: #000;
+            border-radius: 55px;
+            position: relative;
+            border: 8px solid #333;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+        }
+
+        /* Wallpaper Abstrak (Gelombang Biru/Ungu) */
+        .wallpaper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #3b2e6b 0%, #284c8f 50%, #1b4173 100%);
+            z-index: 0;
+        }
+        .wallpaper::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: -20%;
+            width: 140%;
+            height: 60%;
+            background: radial-gradient(ellipse at center, #7157b5 0%, transparent 60%);
+            transform: rotate(-15deg);
+        }
+        .wallpaper::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            right: -20%;
+            width: 120%;
+            height: 70%;
+            background: radial-gradient(ellipse at center, #3b82f6 0%, transparent 65%);
+            transform: rotate(20deg);
+        }
+
+        /* --- STATUS BAR & DYNAMIC ISLAND --- */
+        .dynamic-island {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 35px;
+            background: #000;
+            border-radius: 20px;
+            z-index: 100;
+        }
+
+        .status-bar {
+            position: absolute;
+            top: 20px;
+            left: 28px;
+            right: 28px;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            z-index: 100;
+            pointer-events: none;
+        }
+        .status-icons {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* --- LAYAR (UMUM) --- */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+        }
+
+        /* --- 1. LOCK SCREEN --- */
+        .lock-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 80px;
+        }
+        .date-text {
+            color: white;
+            font-size: 19px;
+            font-weight: 600;
+            margin-bottom: -5px;
+        }
+        .clock-text {
+            color: white;
+            font-size: 92px;
+            font-weight: 700;
+            letter-spacing: -2px;
+        }
+        .lang-pill {
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            font-size: 14px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-top: 10px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Notifikasi */
+        .notification {
+            position: absolute;
+            bottom: 150px;
+            width: 88%;
+            background: rgba(35, 35, 40, 0.6);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 22px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+        .notif-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            position: relative;
+            background-image: url('https://i.pravatar.cc/100?img=11'); /* Foto profil random */
+            background-size: cover;
+        }
+        .notif-badge {
+            position: absolute;
+            bottom: -2px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            background: #25D366;
+            border-radius: 50%;
+            border: 2px solid #232328;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .notif-content { flex: 1; color: white; }
+        .notif-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .notif-time { color: #b3b3b3; font-weight: 400; font-size: 14px; }
+        .notif-msg { font-size: 15px; color: #e5e5e5; }
+
+        /* Tombol Bawah */
+        .lock-bottom {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 15px;
+            cursor: pointer;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0 45px;
+            margin-bottom: 25px;
+        }
+        .circle-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .swipe-text {
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        .home-bar {
+            width: 135px;
+            height: 5px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        /* --- 2. PASSCODE SCREEN --- */
+        .passcode-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 80px;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        .lock-icon { margin-bottom: 15px; }
+        .passcode-screen h2 {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        .passcode-screen p {
+            color: #e5e5e5;
+            font-size: 14px;
+            margin-top: 4px;
+            margin-bottom: 20px;
+        }
+        .dots {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 40px;
+        }
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1.5px solid white;
+            transition: background 0.2s;
+        }
+        .dot.active { background: white; }
+
+        /* Keypad */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            width: 82%;
+        }
+        .key {
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: none;
+            color: white;
+            font-size: 34px;
+            font-weight: 400;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .key:active { background: rgba(255, 255, 255, 0.4); }
+        .key span {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            margin-top: -2px;
+        }
+        .empty { visibility: hidden; }
+        
+        .passcode-bottom {
+            position: absolute;
+            bottom: 35px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 30px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .cancel-btn { cursor: pointer; }
+
+        /* --- 3. HOME SCREEN --- */
+        .home-screen {
+            padding: 70px 25px 0;
+            transform: translateY(100%);
+            opacity: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Widgets */
+        .widgets {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .widget {
+            border-radius: 22px;
+            padding: 15px;
+            flex: 1;
+            height: 150px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .w-calendar {
+            background: #1a1a1a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .w-calendar .day { color: #ff453a; font-size: 14px; font-weight: 600; }
+        .w-calendar .date { font-size: 50px; font-weight: 400; letter-spacing: -2px; line-height: 1; margin-top: -5px; }
+        .w-weather {
+            background: linear-gradient(135deg, #5890c4, #2f5e9e);
+            color: white;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .w-weather .city { font-size: 15px; font-weight: 500; }
+        .w-weather .temp { font-size: 42px; font-weight: 400; line-height: 1; margin: 5px 0; }
+        .w-weather .desc { font-size: 12px; font-weight: 500; }
+        .w-weather .range { font-size: 11px; opacity: 0.8; margin-top: 2px;}
+
+        /* Grid Aplikasi */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            row-gap: 20px;
+            column-gap: 10px;
+            flex: 1;
+        }
+        .app {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            position: relative;
+        }
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .app-name {
+            color: white;
+            font-size: 11px;
+            font-weight: 400;
+        }
+        /* Badge Notif */
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff3b30;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #1b4173; /* Sesuaikan dengan warna background */
+        }
+
+        /* Warna & Ikon Aplikasi */
+        .i-mail { background: linear-gradient(180deg, #1e90ff, #0066cc); }
+        .i-photos { background: #fff; } /* Bunga akan pakai SVG */
+        .i-weather { background: linear-gradient(180deg, #4fa6f6, #1c75d1); }
+        .i-calendar { background: #fff; color: black; flex-direction: column; }
+        .i-calendar span:first-child { color: #ff3b30; font-size: 9px; font-weight: 600; margin-top: 8px;}
+        .i-calendar span:last-child { font-size: 26px; font-weight: 300; line-height: 1; margin-top: 2px;}
+        .i-notes { background: #fff; flex-direction: column; justify-content: flex-start; padding-top: 10px; gap: 4px;}
+        .i-notes div { width: 40px; height: 3px; background: #d1d1d1; border-radius: 2px;}
+        .i-maps { background: #e5e5ea; }
+        .i-x { background: #000; }
+        .i-settings { background: linear-gradient(180deg, #a0a0a5, #737378); }
+        .i-camera { background: #d1d1d6; }
+        .i-clock { background: #000; position: relative; border-radius: 50% !important; }
+        .i-journal { background: #d4e9d4; border: 1px solid #b5d3b5;}
+        .i-instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); }
+
+        /* Search Pill */
+        .search-pill {
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            align-self: center;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Dock */
+        .dock {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(25px);
+            border-radius: 35px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        .dock .app-icon { width: 55px; height: 55px; }
+        .i-phone { background: linear-gradient(180deg, #4cd964, #27cd48); }
+        .i-safari { background: #fff; }
+        .i-wa { background: #25D366; }
+        .i-music { background: linear-gradient(180deg, #fc5c7d, #ff2a54); }
+
+
+        /* --- ANIMASI SHAKE (KALAU PASSWORD SALAH) --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        .shake { animation: shake 0.4s ease-in-out; }
+
+    </style>
 </head>
 <body>
 
-    <!-- Bingkai HP -->
-    <div class="phone-frame">
-        
-        <!-- Dynamic Island -->
+    <div class="iphone-frame">
+        <div class="wallpaper"></div>
         <div class="dynamic-island"></div>
 
-        <!-- Status Bar Gaya iPhone -->
         <div class="status-bar">
-            <div class="time" id="status-time">13:20</div>
-            <div class="icons">
-                <!-- Ikon Sinyal SVG -->
+            <div id="status-time">13:20</div>
+            <div class="status-icons">
+                <!-- Sinyal -->
                 <svg width="18" height="12" viewBox="0 0 18 12" fill="white"><path d="M1 12h2V8H1v4zm4 0h2V6H5v6zm4 0h2V4H9v8zm4 0h2V2h-2v10zm4-10v10h2V2h-2z"/></svg>
-                <!-- Ikon Wifi SVG -->
+                <!-- Wifi -->
                 <svg width="18" height="12" viewBox="0 0 18 12" fill="white"><path d="M9 12l2.5-2.5C10.3 8.5 8.6 8.5 7.5 9.5L9 12zM4.5 6.5l1.5 1.5c1.5-1.5 4-1.5 5.5 0l1.5-1.5c-2.5-2.5-6.5-2.5-8.5 0zM1 3l1.5 1.5c3.5-3.5 9-3.5 12.5 0L16.5 3C12 -1 5 1 1 3z"/></svg>
-                <!-- Ikon Baterai SVG -->
+                <!-- Baterai -->
                 <svg width="24" height="12" viewBox="0 0 24 12" fill="white"><rect x="1" y="1" width="20" height="10" rx="3" stroke="white" stroke-width="1" fill="none"/><rect x="3" y="3" width="16" height="6" rx="1.5" fill="white"/><path d="M22 4v4a2 2 0 0 0 0-4z" fill="white"/></svg>
             </div>
         </div>
 
-        <!-- LAYAR KUNCI -->
+        <!-- ================= LAYAR 1: LOCK SCREEN ================= -->
         <div class="screen lock-screen" id="lock-screen">
-            <div class="lock-content">
-                <p class="date">Saturday, October 31</p>
-                <h1 class="big-time" id="big-time">13:20</h1>
-                <div class="language-pill">🌐 English</div>
-            </div>
+            <div class="date-text" id="lock-date">Saturday, October 31</div>
+            <div class="clock-text" id="big-time">13:20</div>
+            <div class="lang-pill">🌐 English</div>
 
-            <!-- Notifikasi WhatsApp Asli -->
             <div class="notification">
-                <div class="notif-icon">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
+                <div class="notif-avatar">
+                    <div class="notif-badge">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.76.46 3.42 1.27 4.86L2.05 22l5.25-1.38C8.69 21.54 10.27 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.47 13.72c-.25.7-1.48 1.34-2.04 1.42-.56.08-1.26.15-2.94-.61-2.15-.97-3.51-3.26-3.61-3.41-.1-.15-.85-1.13-.85-2.16 0-1.03.54-1.54.73-1.75.19-.21.41-.26.55-.26s.28 0 .4.01c.13.01.3-.05.47.35.18.42.59 1.44.64 1.54.05.1.08.23.01.36-.07.14-.15.22-.28.35-.12.13-.26.29-.37.39-.12.11-.25.23-.11.45.14.22.63 1.03 1.34 1.67.93.83 1.7 1.09 1.94 1.21.24.12.38.1.53-.06.15-.17.64-.75.81-.99.17-.24.34-.2.56-.12.22.08 1.39.65 1.63.77.24.12.4.18.46.28.06.1.06.58-.19 1.28z"/></svg>
+                    </div>
                 </div>
-                <div class="notif-text">
+                <div class="notif-content">
                     <div class="notif-header">
-                        <span class="notif-name">Apin 😍</span>
+                        <span>Apin 😍</span>
                         <span class="notif-time">now</span>
                     </div>
-                    <p class="notif-message">min</p>
+                    <div class="notif-msg">min</div>
                 </div>
             </div>
 
-            <!-- Tombol Bawah & Swipe -->
-            <div class="lock-bottom" id="swipe-area">
-                <div class="bottom-buttons">
-                    <!-- Ikon Senter SVG -->
-                    <button class="circle-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M11 1v2h2V1h-2zm6.7 2.9l-1.4 1.4 1.4 1.4 1.4-1.4-1.4-1.4zM5 2.9L3.6 4.3l1.4 1.4L6.4 4.3 5 2.9zM12 6c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 10c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm-8-4H2v2h2v-2zm16 0h-2v2h2v-2zM12 22v2h2v-2h-2z"/></svg>
-                    </button>
-                    <!-- Ikon Kamera SVG -->
-                    <button class="circle-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
-                    </button>
+            <div class="lock-bottom" onclick="goToPasscode()">
+                <div class="action-buttons">
+                    <button class="circle-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M11 1v2h2V1h-2zm6.7 2.9l-1.4 1.4 1.4 1.4 1.4-1.4-1.4-1.4zM5 2.9L3.6 4.3l1.4 1.4L6.4 4.3 5 2.9zM12 6c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 10c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm-8-4H2v2h2v-2zm16 0h-2v2h2v-2zM12 22v2h2v-2h-2z"/></svg></button>
+                    <button class="circle-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg></button>
                 </div>
-                <!-- Teks ini yang akan kita buat interaktif -->
-                <p class="swipe-text" onclick="bukaLayarPassword()">Swipe up to open</p>
-                <div class="home-indicator"></div>
+                <div class="swipe-text">Swipe up to open</div>
+                <div class="home-bar"></div>
             </div>
         </div>
 
-        <!-- LAYAR PASSWORD (Gambar 2) - Tersembunyi di awal -->
-        <div class="screen passcode-screen hidden" id="passcode-screen">
+        <!-- ================= LAYAR 2: PASSCODE ================= -->
+        <div class="screen passcode-screen" id="passcode-screen">
             <div class="lock-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
             </div>
             <h2>Enter Passcode</h2>
-            <p class="hint">alif's birthday</p>
+            <p>alif's birthday</p>
             
-            <!-- Titik-titik Password -->
-            <div class="passcode-dots">
+            <div class="dots" id="dots-container">
                 <div class="dot"></div>
                 <div class="dot"></div>
                 <div class="dot"></div>
                 <div class="dot"></div>
             </div>
 
-            <!-- Keypad Angka -->
             <div class="keypad">
-                <button class="key" onclick="tekanAngka('1')">1<span>ABC</span></button>
-                <button class="key" onclick="tekanAngka('2')">2<span>DEF</span></button>
-                <button class="key" onclick="tekanAngka('3')">3<span>GHI</span></button>
-                <button class="key" onclick="tekanAngka('4')">4<span>JKL</span></button>
-                <button class="key" onclick="tekanAngka('5')">5<span>MNO</span></button>
-                <button class="key" onclick="tekanAngka('6')">6<span>PQR</span></button>
-                <button class="key" onclick="tekanAngka('7')">7<span>STU</span></button>
-                <button class="key" onclick="tekanAngka('8')">8<span>VWX</span></button>
-                <button class="key" onclick="tekanAngka('9')">9<span>YZ</span></button>
+                <button class="key" onclick="pressKey('1')">1<span>ABC</span></button>
+                <button class="key" onclick="pressKey('2')">2<span>DEF</span></button>
+                <button class="key" onclick="pressKey('3')">3<span>GHI</span></button>
+                <button class="key" onclick="pressKey('4')">4<span>JKL</span></button>
+                <button class="key" onclick="pressKey('5')">5<span>MNO</span></button>
+                <button class="key" onclick="pressKey('6')">6<span>PQR</span></button>
+                <button class="key" onclick="pressKey('7')">7<span>STU</span></button>
+                <button class="key" onclick="pressKey('8')">8<span>VWX</span></button>
+                <button class="key" onclick="pressKey('9')">9<span>YZ</span></button>
                 <div class="empty"></div>
-                <button class="key" onclick="tekanAngka('0')">0</button>
-                <button class="key text-key" onclick="hapusAngka()">Cancel</button>
+                <button class="key" onclick="pressKey('0')">0</button>
+                <button class="key cancel-btn" onclick="cancelPasscode()" style="font-size:16px; font-weight:500;">Cancel</button>
             </div>
-            <p class="emergency">Emergency</p>
+
+            <div class="passcode-bottom">
+                <div>Emergency</div>
+            </div>
+        </div>
+
+        <!-- ================= LAYAR 3: HOME SCREEN ================= -->
+        <div class="screen home-screen" id="home-screen">
+            
+            <!-- Widgets -->
+            <div class="widgets">
+                <div class="widget w-calendar">
+                    <div class="day">Saturday</div>
+                    <div class="date">31</div>
+                </div>
+                <div class="widget w-weather">
+                    <div class="city">Yogyakarta ↗</div>
+                    <div class="temp">26°</div>
+                    <div class="desc">Hujan ringan</div>
+                    <div class="range">H:29° L:22°</div>
+                </div>
+            </div>
+
+            <!-- Apps Grid -->
+            <div class="app-grid">
+                <!-- Baris 1 -->
+                <div class="app">
+                    <div class="app-icon i-mail">
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="white"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                        <div class="badge">1</div>
+                    </div>
+                    <div class="app-name">Mail</div>
+                </div>
+                <div class="app">
+                    <div class="app-icon i-photos">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="#ffcc00"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z" fill="#ff9500"/><circle cx="12" cy="12" r="3" fill="#ff3b30"/></svg>
+                    </div>
+                    <div class="app-name">Photos</div>
+                </div>
+                <div class="app">
+                    <div class="app-icon i-weather">
+                        <svg width="38" height="38" viewBox="0 0 24 24" fill="white"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
+                    </div>
+                    <div class="app-name">Weather</div>
+                </div>
+                <div class="app">
+                    <div class="app-icon i-calendar">
+                        <span>Saturday</span>
+                        <span>31</span>
+                    </div>
+                    <div class="app-name">Calendar</div>
+                </div>
+
+                <!-- Baris 2 -->
+                <div class="app">
+                    <div class="app-icon i-notes">
+                        <div></div><div></div><div></div>
+                    </div>
+                    <div class="app-name">Notes</div>
+                </div>
+                <div class="app">
+                    <div class="app-icon i-maps">
+                        <svg width="40" height="40" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#007aff"/></svg>
+                    </div>
+                    <div class="app-name">Maps</div>
+                </div>
+                <div class="app">
+                    <div class="app-icon i-x">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </div>
+                    <div class="app-name">X</div>
+                </div>
+                <div class="app">
+                    <div class="app-icon i-settings">
+                        <svg width="42" height="42" viewBox="0 0 24 24" fill="white"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                    </div>
+                    <div class="app-name">Settings</div>
+                </div>
+
+                <!-- Baris 3 -->
+                <div class="app">
+                    <div class="app-icon i-camera">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="#555"><path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                    </div>
+                    <div class="app-name">Camera</div>
+                </div>
+                <div class="app">
+                    <div class="app-icon i-clock">
+                        <!-- Jam Analog Sederhana -->
+                        <div style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid white; position: relative;">
+                            <div style="position: absolute; top: 25px; left: 24px; width: 2px; height: 15px; background: white; transform-origin: bottom; transform: rotate(45deg);"></div>
+                            <div style="position: absolute; top: 25px; left: 24px; width: 2px; height: 10px; background: #ff3b30; transform-origin: bottom; transform: rotate(180deg);"></div>
+                        </div>
+                    </div>
+                    <div class="app-name">Clock</div>
+                </div>
+                <div class="app">
+                    <div class="app-icon i-journal">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="#2c5e2c"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                    </div>
+                    <div class="app-name">Journal</div>
+                </div>
+                <div class="app">
+                    <div class="app-icon i-instagram">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </div>
+                    <div class="app-name">Instagram</div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="search-pill">
+                🔍 Search
+            </div>
+
+            <!-- Dock -->
+            <div class="dock">
+                <div class="app-icon i-phone">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="white"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                </div>
+                <div class="app-icon i-safari">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="#007aff"><circle cx="12" cy="12" r="10" fill="white" stroke="#007aff" stroke-width="1.5"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2.14 12.14l-6.28 2.14 2.14-6.28 6.28-2.14-2.14 6.28z" fill="#007aff"/></svg>
+                </div>
+                <div class="app-icon i-wa">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.76.46 3.42 1.27 4.86L2.05 22l5.25-1.38C8.69 21.54 10.27 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.47 13.72c-.25.7-1.48 1.34-2.04 1.42-.56.08-1.26.15-2.94-.61-2.15-.97-3.51-3.26-3.61-3.41-.1-.15-.85-1.13-.85-2.16 0-1.03.54-1.54.73-1.75.19-.21.41-.26.55-.26s.28 0 .4.01c.13.01.3-.05.47.35.18.42.59 1.44.64 1.54.05.1.08.23.01.36-.07.14-.15.22-.28.35-.12.13-.26.29-.37.39-.12.11-.25.23-.11.45.14.22.63 1.03 1.34 1.67.93.83 1.7 1.09 1.94 1.21.24.12.38.1.53-.06.15-.17.64-.75.81-.99.17-.24.34-.2.56-.12.22.08 1.39.65 1.63.77.24.12.4.18.46.28.06.1.06.58-.19 1.28z"/></svg>
+                    <div class="badge" style="border-color: #25D366;">3</div>
+                </div>
+                <div class="app-icon i-music">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                </div>
+            </div>
         </div>
 
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // --- LOGIKA JAM REALTIME ---
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('status-time').innerText = `${hours}:${minutes}`;
+            document.getElementById('big-time').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // --- LOGIKA PINDAH LAYAR ---
+        const lockScreen = document.getElementById('lock-screen');
+        const passcodeScreen = document.getElementById('passcode-screen');
+        const homeScreen = document.getElementById('home-screen');
+
+        function goToPasscode() {
+            lockScreen.style.transform = "translateY(-100%)";
+            lockScreen.style.opacity = "0";
+            
+            passcodeScreen.style.transform = "translateY(0)";
+            passcodeScreen.style.opacity = "1";
+        }
+
+        // --- LOGIKA PASSWORD ---
+        let inputPasscode = "";
+        const correctPasscode = "2003"; // Password disetting 2003 sayang!
+        const dots = document.querySelectorAll('.dot');
+
+        function pressKey(num) {
+            if (inputPasscode.length < 4) {
+                inputPasscode += num;
+                updateDots();
+            }
+
+            if (inputPasscode.length === 4) {
+                setTimeout(checkPasscode, 250);
+            }
+        }
+
+        function updateDots() {
+            dots.forEach((dot, index) => {
+                if (index < inputPasscode.length) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function checkPasscode() {
+            if (inputPasscode === correctPasscode) {
+                // Jika benar, masuk Home Screen
+                passcodeScreen.style.transform = "translateY(-100%)";
+                passcodeScreen.style.opacity = "0";
+                
+                homeScreen.style.transform = "translateY(0)";
+                homeScreen.style.opacity = "1";
+            } else {
+                // Jika salah, getarkan layar
+                passcodeScreen.classList.add('shake');
+                setTimeout(() => {
+                    passcodeScreen.classList.remove('shake');
+                    inputPasscode = "";
+                    updateDots();
+                }, 400);
+            }
+        }
+
+        function cancelPasscode() {
+            inputPasscode = "";
+            updateDots();
+        }
+    </script>
 </body>
 </html>
