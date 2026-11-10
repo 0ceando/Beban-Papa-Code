@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peeking Phone AU</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font untuk tampilan iOS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Bingkai HP -->
+    <div class="phone-frame">
+        
+        <!-- Dynamic Island (Lubang atas) -->
+        <div class="dynamic-island"></div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="time" id="status-time">13:20</div>
+            <div class="icons">
+                <span>📶</span>
+                <span>📶</span>
+                <span>🔋</span>
+            </div>
+        </div>
+
+        <!-- LAYAR KUNCI (Gambar 1) -->
+        <div class="screen lock-screen" id="lock-screen">
+            <div class="lock-content">
+                <p class="date">Saturday, October 31</p>
+                <h1 class="big-time" id="big-time">13:20</h1>
+                <div class="language-pill">🌐 English</div>
+            </div>
+
+            <!-- Notifikasi WhatsApp -->
+            <div class="notification">
+                <div class="notif-icon">💬</div>
+                <div class="notif-text">
+                    <div class="notif-header">
+                        <span class="notif-name">Apin 😍</span>
+                        <span class="notif-time">now</span>
+                    </div>
+                    <p class="notif-message">min</p>
+                </div>
+            </div>
+
+            <!-- Tombol Bawah -->
+            <div class="lock-bottom">
+                <div class="bottom-buttons">
+                    <button class="circle-btn">🔦</button>
+                    <button class="circle-btn">📷</button>
+                </div>
+                <p class="swipe-text">Swipe up to open</p>
+                <div class="home-indicator"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
