@@ -1,204 +1,68 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+// 1. Set Jam Real-time
+function updateTime() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const timeString = `${hours}:${minutes}`;
+    
+    document.getElementById('status-time').innerText = timeString;
+    document.getElementById('big-time').innerText = timeString;
+}
+setInterval(updateTime, 1000);
+updateTime();
+
+// 2. Logika Pindah Layar (Swipe Up / Klik)
+function bukaLayarPassword() {
+    const lockScreen = document.getElementById('lock-screen');
+    const passcodeScreen = document.getElementById('passcode-screen');
+    
+    // Geser layar kunci ke atas (hilang)
+    lockScreen.style.transform = "translateY(-100%)";
+    lockScreen.style.opacity = "0";
+    
+    // Munculkan layar password
+    passcodeScreen.classList.remove('hidden');
 }
 
-body {
-    background-color: #1a1a1a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+// 3. Logika Mengetik Password
+let passwordDiketik = "";
+const passwordBenar = "2408"; // GANTI ANGKA INI SESUAI KEINGINANMU
+
+function tekanAngka(angka) {
+    if (passwordDiketik.length < 4) {
+        passwordDiketik += angka;
+        updateDots();
+    }
+    
+    // Jika sudah 4 angka, cek benar/salah
+    if (passwordDiketik.length === 4) {
+        setTimeout(() => {
+            if (passwordDiketik === passwordBenar) {
+                alert("Password Benar! Lanjut ke Home Screen (Fase 3)");
+                // Nanti di Fase 3, kita ganti alert ini dengan animasi buka Home Screen
+            } else {
+                alert("Password Salah! Coba lagi.");
+                passwordDiketik = ""; // Reset
+                updateDots();
+            }
+        }, 300);
+    }
 }
 
-/* Bingkai HP */
-.phone-frame {
-    width: 390px;
-    height: 844px;
-    background: linear-gradient(135deg, #6c4eb5 0%, #3a6bb3 100%);
-    border-radius: 55px;
-    position: relative;
-    overflow: hidden;
-    border: 8px solid #333;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0,0,0,0.3);
+function hapusAngka() {
+    if (passwordDiketik.length > 0) {
+        passwordDiketik = passwordDiketik.slice(0, -1);
+        updateDots();
+    }
 }
 
-/* Background abstrak */
-.phone-frame::before {
-    content: '';
-    position: absolute;
-    bottom: -10%;
-    right: -10%;
-    width: 80%;
-    height: 80%;
-    background: radial-gradient(circle, #52a0e8 0%, transparent 70%);
-    border-radius: 50%;
-    z-index: 0;
-}
-
-/* Dynamic Island */
-.dynamic-island {
-    position: absolute;
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 120px;
-    height: 35px;
-    background-color: #000;
-    border-radius: 20px;
-    z-index: 100;
-}
-
-/* Status Bar */
-.status-bar {
-    position: absolute;
-    top: 20px;
-    left: 30px;
-    right: 30px;
-    display: flex;
-    justify-content: space-between;
-    color: white;
-    font-size: 15px;
-    font-weight: 600;
-    z-index: 50;
-}
-
-/* Layar Kunci */
-.lock-screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: white;
-    z-index: 10;
-    transition: transform 0.5s ease-in-out;
-}
-
-.lock-content {
-    margin-top: 100px;
-    text-align: center;
-}
-
-.date {
-    font-size: 18px;
-    font-weight: 500;
-    margin-bottom: -5px;
-}
-
-.big-time {
-    font-size: 96px;
-    font-weight: 700;
-    letter-spacing: -2px;
-}
-
-.language-pill {
-    margin-top: 10px;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 14px;
-    display: inline-block;
-    backdrop-filter: blur(10px);
-}
-
-/* Notifikasi */
-.notification {
-    position: absolute;
-    bottom: 180px;
-    width: 90%;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(20px);
-    border-radius: 25px;
-    padding: 15px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    border: 1px solid rgba(255,255,255,0.1);
-    transition: opacity 0.3s ease;
-}
-
-.notif-icon {
-    width: 45px;
-    height: 45px;
-    background: #25D366; /* Warna WhatsApp */
-    border-radius: 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 24px;
-}
-
-.notif-text {
-    flex: 1;
-}
-
-.notif-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 3px;
-}
-
-.notif-name {
-    font-weight: 600;
-    font-size: 15px;
-}
-
-.notif-time {
-    font-size: 12px;
-    color: #ccc;
-}
-
-.notif-message {
-    font-size: 14px;
-    color: #eee;
-}
-
-/* Tombol Bawah & Swipe */
-.lock-bottom {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-bottom: 20px;
-}
-
-.bottom-buttons {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    padding: 0 40px;
-    margin-bottom: 20px;
-}
-
-.circle-btn {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    font-size: 20px;
-    backdrop-filter: blur(10px);
-    cursor: pointer;
-}
-
-.swipe-text {
-    font-size: 14px;
-    margin-bottom: 20px;
-    font-weight: 500;
-}
-
-.home-indicator {
-    width: 130px;
-    height: 5px;
-    background-color: white;
-    border-radius: 10px;
+function updateDots() {
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach((dot, index) => {
+        if (index < passwordDiketik.length) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
 }
